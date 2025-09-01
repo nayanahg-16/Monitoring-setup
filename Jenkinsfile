@@ -83,9 +83,9 @@ pipeline {
 
     post {
         success {
-            echo "✅ Monitoring stack is up!"
-            echo "🔗 Grafana:     http://<your-ec2-ip>:3000"
-            echo "🔗 Prometheus:  http://<your-ec2-ip>:9090"
+            echo "✅ Monitoring stack deployed"
+            echo "🔗 Grafana: http://<your-ec2-ip>:3000"
+            echo "🔗 Prometheus: http://<your-ec2-ip>:9090"
             echo "🔗 Alertmanager: http://<your-ec2-ip>:9093"
         }
     }
