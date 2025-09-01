@@ -1,0 +1,29 @@
+groups:
+  - name: node_exporter_alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected on {{ $labels.instance }}"
+          description: "CPU usage is above 80% for more than 2 minutes."
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "More than 80% memory used for 2 minutes."
+
+      - alert: DiskAlmostFull
+        expr: (node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} - node_filesystem_free_bytes{fstype!~"tmpfs|overlay"}) / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} > 0.9
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk usage above 90% on {{ $labels.instance }}"
+          description: "Less than 10% disk space remaining."
