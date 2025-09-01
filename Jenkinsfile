@@ -16,15 +16,15 @@ pipeline {
         }
 
         stage('Prepare Config Files') {
-            steps {
-                sh '''
-                mkdir -p $PROMETHEUS_CONFIG_DIR
-                cp prometheus.yml $PROMETHEUS_CONFIG_DIR/prometheus.yml
-                cp alert.rules.yml $PROMETHEUS_CONFIG_DIR/alert.rules.yml
+    steps {
+        sh '''
+        mkdir -p $PROMETHEUS_CONFIG_DIR
+        cp prometheus.yml $PROMETHEUS_CONFIG_DIR/prometheus.yml
+        cp alert.rules.yml $PROMETHEUS_CONFIG_DIR/alert.rules.yml
 
-                mkdir -p $ALERTMANAGER_CONFIG_DIR
-                cp alertmanager/config.yml $ALERTMANAGER_CONFIG_DIR/config.yml
-                '''
+        # alertmanager config is already in the right place — no need to copy
+        echo "✅ Config files prepared"
+        '''
             }
         }
 
