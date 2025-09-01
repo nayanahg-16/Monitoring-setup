@@ -27,3 +27,13 @@ groups:
         annotations:
           summary: "Disk usage above 90% on {{ $labels.instance }}"
           description: "Less than 10% disk space remaining."
+
+      - alert: AlwaysFiring
+        expr: vector(1)
+        for: 1m
+        labels:
+          severity: test
+        annotations:
+          summary: "Test Alert"
+          description: "This is a test alert to verify Slack integration."
+
