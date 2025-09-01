@@ -3,22 +3,27 @@ pipeline {
 
     environment {
         PROMETHEUS_CONFIG_DIR = "${WORKSPACE}/prometheus"
+        ALERTMANAGER_CONFIG_DIR = "${WORKSPACE}/alertmanager"
     }
 
     stages {
         stage('Clean Existing Containers') {
             steps {
                 sh '''
-                docker rm -f prometheus grafana node-exporter || true
+                docker rm -f prometheus grafana node-exporter alertmanager || true
                 '''
             }
         }
 
-        stage('Prepare Prometheus Config') {
+        stage('Prepare Config Files') {
             steps {
                 sh '''
                 mkdir -p $PROMETHEUS_CONFIG_DIR
                 cp prometheus.yml $PROMETHEUS_CONFIG_DIR/prometheus.yml
+                cp alert.rules.yml $PROMETHEUS_CONFIG_DIR/alert.rules.yml
+
+                mkdir -p $ALERTMANAGER_CONFIG_DIR
+                cp alertmanager/config.yml $ALERTMANAGER_CONFIG_DIR/config.yml
                 '''
             }
         }
@@ -35,6 +40,19 @@ pipeline {
             }
         }
 
+        stage('Run Alertmanager') {
+            steps {
+                sh '''
+                docker run -d \
+                    --name alertmanager \
+                    -p 9093:9093 \
+                    -v $ALERTMANAGER_CONFIG_DIR:/etc/alertmanager \
+                    prom/alertmanager \
+                    --config.file=/etc/alertmanager/config.yml
+                '''
+            }
+        }
+
         stage('Run Prometheus') {
             steps {
                 sh '''
@@ -42,6 +60,7 @@ pipeline {
                     --name prometheus \
                     -p 9090:9090 \
                     -v $PROMETHEUS_CONFIG_DIR:/etc/prometheus \
+                    --link alertmanager:alertmanager \
                     prom/prometheus
                 '''
             }
@@ -67,9 +86,7 @@ pipeline {
             echo "✅ Monitoring stack is up!"
             echo "🔗 Grafana:     http://<your-ec2-ip>:3000"
             echo "🔗 Prometheus:  http://<your-ec2-ip>:9090"
-        }
-        failure {
-            echo "❌ Something went wrong. Check the pipeline logs."
+            echo "🔗 Alertmanager: http://<your-ec2-ip>:9093"
         }
     }
 }
