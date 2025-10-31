@@ -16,12 +16,12 @@ pipeline {
         stage('Run Node Exporter') {
             steps {
                 sh '''
-                docker ps -q --filter "name=node-exporter1" | grep -q . && docker stop node-exporter1 && docker rm node-exporter1 || true
+                docker ps -q --filter "name=node-exporter" | grep -q . && docker stop node-exporter && docker rm node-exporter || true
 
                 docker run -d \
-                  --name=node-exporter1 \
+                  --name=node-exporter \
                   -p 9100:9100 \
-                  prom/node-exporter1
+                  prom/node-exporter
                 '''
             }
         }
